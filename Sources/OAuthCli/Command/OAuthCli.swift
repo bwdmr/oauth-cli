@@ -1,10 +1,9 @@
 import Vapor
-import OAuthKit
 import ArgumentParser
+import OAuth
 
 
-
-struct PreflightCode: Content {
+struct PreflightCode: Sendable, Content {
   var clientID: String
   var redirectURI: String
   var scope: String
@@ -58,7 +57,7 @@ struct PreflightCode: Content {
 
 
 @main
-public struct OAuthCli: AsyncParsableCommand {
+public struct OAuthCli: Sendable, AsyncParsableCommand {
   public init() {}
   
   public func preflight(
@@ -74,16 +73,14 @@ public struct OAuthCli: AsyncParsableCommand {
     try await preflight.preflightRequest()
   }
   
-  
   public func serve(
+    app: Application,
     port: String,
     clientID: String,
     clientSecret: String,
     redirectURI: String,
     scope: String
   ) async throws {
-    let app = Application()
-    defer { app.shutdown() }
 
     try await configure(
       app,
@@ -97,7 +94,7 @@ public struct OAuthCli: AsyncParsableCommand {
   }
   
   
-  public struct Options: ParsableArguments {
+  public struct Options: Sendable, ParsableArguments {
     public init() {}
     
     @ArgumentParser.Flag(name: .customLong("google"), help: "The Provider relied on.")
@@ -149,16 +146,20 @@ redirecturi: \(redirectURL)
     try await withThrowingTaskGroup(of: Void.self) { group in
       
       group.addTask {
+        let app = try await Application.make()
         try await serve(
+          app: app,
           port: port.description,
           clientID: clientID,
           clientSecret: clientSecret,
           redirectURI: redirectURLString,
           scope: scope)
+        
+        try await app.asyncShutdown()
       }
       
       group.addTask {
-        guard let redirectURI = options.redirectURI?.description else { throw Abort(.notFound) }
+        guard let redirectURI = options.redirectURI?.description else { throw Abort(.badRequest) }
         
         try await preflight(
           clientID: clientID,
@@ -166,7 +167,9 @@ redirecturi: \(redirectURL)
           scope: scope)
       }
       
+      
       try await group.waitForAll()
+      
     }
   }
 }

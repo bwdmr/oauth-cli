@@ -3,11 +3,10 @@ import OAuth
 
 
 
-struct EmailAccessToken: OAuthHeadToken, GoogleToken {
+struct EmailAccessToken: GoogleToken, OAuth.OAuthToken {
   enum CodingKeys: String, CodingKey {
     case endpoint = "endpoint"
     case accessToken = "access_token"
-    case email = "email"
     case expiresIn = "expires_in"
     case refreshToken = "refresh_token"
     case scope = "scope"
@@ -16,7 +15,6 @@ struct EmailAccessToken: OAuthHeadToken, GoogleToken {
   
   var endpoint: URL?
   var accessToken: AccessTokenClaim?
-  var email: EmailClaim?
   var expiresIn: ExpiresInClaim?
   var refreshToken: RefreshTokenClaim?
   var scope: ScopeClaim?
@@ -56,8 +54,13 @@ public func configure(
     clientID: clientID,
     clientSecret: clientSecret,
     redirectURI: redirectURI,
-    scope: scopeClaim
-  )
+    scope: scopeClaim)
+  
+  
+  // accessible
+  try await app.oauth.services.register(oauthGoogle)
  
-  try await app.oauth.google.make(service: oauthGoogle, token: [emailToken], head: emailToken)
+  try await app.oauth.google.make(service: oauthGoogle)
+  // try await app.oauth.services.register(oauthGoogle)
+  // try await app.oauth.google.make<EmailAccessToken>(service: oauthGoogle)
 }
