@@ -58,7 +58,7 @@ struct PreflightCode: Content {
 
 
 @main
-public struct Elmo: AsyncParsableCommand {
+public struct OAuthCli: AsyncParsableCommand {
   public init() {}
   
   public func preflight(
