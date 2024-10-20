@@ -22,7 +22,7 @@ let package = Package(
     targets: [
       .executableTarget(name: "OAuthCli", dependencies: [
         .product(name: "Vapor", package: "vapor"),
-        .product(name: "OAuth", package: "oauth"),
+        .product(name: "OAuth", package: "OAuth"),
         .product(name: "ArgumentParser", package: "swift-argument-parser")
       ]),
       .testTarget(name: "OAuthCliTests", dependencies: [

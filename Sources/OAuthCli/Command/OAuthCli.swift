@@ -3,6 +3,8 @@ import ArgumentParser
 import OAuth
 
 
+
+
 struct PreflightCode: Sendable, Content {
   var clientID: String
   var redirectURI: String
@@ -158,6 +160,7 @@ redirecturi: \(redirectURL)
         try await app.asyncShutdown()
       }
       
+      
       group.addTask {
         guard let redirectURI = options.redirectURI?.description else { throw Abort(.badRequest) }
         
@@ -169,7 +172,6 @@ redirecturi: \(redirectURL)
       
       
       try await group.waitForAll()
-      
     }
   }
 }

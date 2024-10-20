@@ -2,8 +2,9 @@ import Vapor
 import OAuth
 
 
+struct EmailAccessToken: GoogleToken, AuthenticatableOAuthToken  {
 
-struct EmailAccessToken: GoogleToken, OAuth.OAuthToken {
+  
   enum CodingKeys: String, CodingKey {
     case endpoint = "endpoint"
     case accessToken = "access_token"
@@ -19,6 +20,12 @@ struct EmailAccessToken: GoogleToken, OAuth.OAuthToken {
   var refreshToken: RefreshTokenClaim?
   var scope: ScopeClaim?
   var tokenType: TokenTypeClaim?
+  
+  func authenticate(token: EmailAccessToken, for request: Vapor.Request) async throws {
+    let logger = Logger(label: "bello")
+    logger.log(level: .info, "john")
+    request.auth.login(token)
+  }
 }
 
 
@@ -47,7 +54,7 @@ public func configure(
   let redirectURI = RedirectURIClaim(stringLiteral: redirectURI)
   let scopeClaim = ScopeClaim(stringLiteral: scope)
   let emailToken = EmailAccessToken(endpoint: infoendpointURL, scope: scopeClaim)
- 
+
   let oauthGoogle = GoogleService(
     authenticationEndpoint: authenticationEndpoint,
     tokenEndpoint: tokenEndpoint,
@@ -56,11 +63,5 @@ public func configure(
     redirectURI: redirectURI,
     scope: scopeClaim)
   
-  
-  // accessible
-  try await app.oauth.services.register(oauthGoogle)
- 
-  try await app.oauth.google.make(service: oauthGoogle)
-  // try await app.oauth.services.register(oauthGoogle)
-  // try await app.oauth.google.make<EmailAccessToken>(service: oauthGoogle)
+  try await app.oauth.google.make(service: oauthGoogle, token: emailToken)
 }

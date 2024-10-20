@@ -12,7 +12,8 @@ A demonstration of the usability of [OAuth](https://github.com/bwdmr/oauth) and 
 
 - Command:
 ```shell
-swift run oauth-cli --google \                                                           
+swift run oauth-cli \
+--google \                                                           
 --clientid YOURCLIENTID \
 --clientsecret YOURCLIENTSECRET \
 --redirecturi YOURREDIRECTURI \
